@@ -1,0 +1,93 @@
+package com.arimayi.billing.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/**
+ * Entité représentant une ligne de facture
+ */
+@Entity
+@Table(name = "lignes_facture")
+public class LigneFacture {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @NotBlank(message = "La description est obligatoire")
+    @Column(nullable = false, length = 500)
+    private String description;
+    
+    @NotNull(message = "La quantité est obligatoire")
+    @DecimalMin(value = "0.01", message = "La quantité doit être positive")
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal quantite;
+    
+    @NotNull(message = "Le prix unitaire HT est obligatoire")
+    @DecimalMin(value = "0.00", message = "Le prix unitaire HT doit être positif ou nul")
+    @Column(name = "prix_unitaire_ht", nullable = false, precision = 10, scale = 2)
+    private BigDecimal prixUnitaireHT;
+    
+    @NotNull(message = "Le taux de TVA est obligatoire")
+    @Column(name = "taux_tva", nullable = false, precision = 5, scale = 2)
+    private BigDecimal tauxTVA;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facture_id", nullable = false)
+    private Facture facture;
+    
+    // Constructeurs
+    public LigneFacture() {}
+    
+    public LigneFacture(String description, BigDecimal quantite, BigDecimal prixUnitaireHT, BigDecimal tauxTVA) {
+        this.description = description;
+        this.quantite = quantite;
+        this.prixUnitaireHT = prixUnitaireHT;
+        this.tauxTVA = tauxTVA;
+    }
+    
+    /**
+     * Calcule le total HT de la ligne
+     */
+    public BigDecimal getTotalHT() {
+        return quantite.multiply(prixUnitaireHT).setScale(2, RoundingMode.HALF_UP);
+    }
+    
+    /**
+     * Calcule le total TVA de la ligne
+     */
+    public BigDecimal getTotalTVA() {
+        return getTotalHT().multiply(tauxTVA.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+    
+    /**
+     * Calcule le total TTC de la ligne
+     */
+    public BigDecimal getTotalTTC() {
+        return getTotalHT().add(getTotalTVA());
+    }
+    
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public BigDecimal getQuantite() { return quantite; }
+    public void setQuantite(BigDecimal quantite) { this.quantite = quantite; }
+    
+    public BigDecimal getPrixUnitaireHT() { return prixUnitaireHT; }
+    public void setPrixUnitaireHT(BigDecimal prixUnitaireHT) { this.prixUnitaireHT = prixUnitaireHT; }
+    
+    public BigDecimal getTauxTVA() { return tauxTVA; }
+    public void setTauxTVA(BigDecimal tauxTVA) { this.tauxTVA = tauxTVA; }
+    
+    public Facture getFacture() { return facture; }
+    public void setFacture(Facture facture) { this.facture = facture; }
+}
