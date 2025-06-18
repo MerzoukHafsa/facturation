@@ -48,8 +48,7 @@ Module de facturation REST développé avec Spring Boot pour la plateforme de ge
 ### Démarrage
 \`\`\`bash
 # Cloner le projet
-git clone <repository-url>
-cd billing-module
+git clone https://github.com/MerzoukHafsa/facturation.git
 
 # Compiler et démarrer
 mvn spring-boot:run
