@@ -1,4 +1,4 @@
-# Module de Facturation AriMayi
+# Module de Facturation
 
 ## Description
 
